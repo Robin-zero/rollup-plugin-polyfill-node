@@ -1,5 +1,5 @@
 const rollup = require('rollup');
-// const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const nodeResolve = require('@rollup/plugin-node-resolve');
 const commonjs = require('@rollup/plugin-commonjs');
@@ -9,16 +9,18 @@ async function main() {
   await Promise.all([
     bundleDependency('process-es6'),
     bundleDependency('buffer-es6'),
-    // bundleDependency('browserify-fs'),
-    // bundleDependency('crypto-browserify'),
+    bundleDependency('browserify-fs'),
+    bundleDependency('crypto-browserify'),
   ])
 
   // quick and dirty find-replace
-  // const cryptoPolyfillLoc = path.join(__dirname, '../polyfills/crypto-browserify.js');
-  // let cryptoPolyfill = fs.readFileSync(cryptoPolyfillLoc, 'utf8');
-  // cryptoPolyfill = cryptoPolyfill.replace(`import buffer$1 from 'buffer';`, `import * as buffer$1 from 'buffer';`);
+  const cryptoPolyfillLoc = path.join(__dirname, '../polyfills/crypto-browserify.js');
+  let cryptoPolyfill = fs.readFileSync(cryptoPolyfillLoc, 'utf8');
+  cryptoPolyfill = cryptoPolyfill.replace(`import require$$0$1 from 'buffer';`, `import * as require$$$0$1 from 'buffer';`);
+  cryptoPolyfill = cryptoPolyfill.replace(`import require$$2$1 from 'string_decoder';`, `import * as require$$$2$1 from 'string_decoder';`);
+  cryptoPolyfill = cryptoPolyfill.replace(`buffer$1.hasOwnProperty(key)`, `Object.prototype.hasOwnProperty.call(buffer$1, key)`);
   // console.log(cryptoPolyfill);
-  // fs.writeFileSync(cryptoPolyfillLoc, cryptoPolyfill`, 'utf8'`)
+  fs.writeFileSync(cryptoPolyfillLoc, cryptoPolyfill, 'utf8');
 }
 
 async function bundleDependency(depName) {
